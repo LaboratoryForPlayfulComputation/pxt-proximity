@@ -1,4 +1,4 @@
-//% color=#0062dB weight=96 icon="\uf294" block="Proximity"
+//% color=#0062dB weight=96 icon="\uf500" block="Proximity"
 namespace proximity {
     /* For saving most recent info */
     let lastNumber: number = -1;
@@ -70,8 +70,8 @@ namespace proximity {
     */
     //% blockId=radio_other_signal block="signal of other microbit %serialNo" blockGap=8
     export function signalStrengthOfRemoteMicrobit(serialNo: number): number {
-        if (lastSerial == serialNo) {
-            return lastSignal;
+        if (lastKnownInformation[serialNo]["signal"]) {
+            return lastKnownInformation[serialNo]["signal"];
         }
         return -1;
     }
