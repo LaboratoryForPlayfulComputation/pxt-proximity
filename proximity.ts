@@ -1,4 +1,4 @@
-//% color=#0062dB weight=96 block="Proximity"
+//% color=#0062dB weight=96 icon="\uf500" block="Proximity"
 namespace proximity {
     /* For saving most recent info */
     let lastNumber: number = -1;
@@ -76,10 +76,12 @@ namespace proximity {
         msgCount += 1;
     });
 
+    radio.setTransmitSerialNumber(true);
+
     /** 
      * 
     */
-    //% blockId=radio_other_signal block="signal of other microbit %serialNo" blockGap=8
+    //% blockId=proximity_signal block="signal of other microbit %serialNo" blockGap=8
     export function signalStrengthOfRemoteMicrobit(serialNo: number): number {
         for (let i = 0; i < lastKnownInformation.length; i++) {
             if (lastKnownInformation[i].serial == serialNo) {
@@ -89,20 +91,20 @@ namespace proximity {
         return -1;
     }
 
-    export function lastKnownInfo(): string {
-        for (let i = 0; i < lastKnownInformation.length; i++) {
-            if (lastKnownInformation[i].serial == -1598746869) {
-                return "yes";
-            }
-        }
-        return "no";
+    /** 
+     * 
+    */
+    //% blockId=proximity_group block="set group %id" blockGap=8
+    export function setGroup(id: number){
+        radio.setGroup(id);
     }
 
-    export function numMessagesRecvd(): string {
-        return msgCount.toString();
+    /** 
+     * 
+    */
+    //% blockId=proximity_power block="set transmit power %power" blockGap=8
+    export function setTransmitPower(power: number){
+        radio.setTransmitPower(power);
     }
 
-    export function printLastSerial(): string {
-        return lastSerial.toString();
-    }
 }
