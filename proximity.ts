@@ -8,6 +8,7 @@ namespace proximity {
     let lastSerial: number = -1;
     let lastSignal: number = -1;
     let lastKnownInformation: Array<RemoteMicrobit> = [];
+    let msgCount: number = 0;
 
     export class RemoteMicrobit {
         public serial: number;
@@ -58,6 +59,7 @@ namespace proximity {
         packet.receivedString = radio.receivedString();
         packet.receivedBuffer = radio.receivedBuffer();
         packet.signal = radio.receivedSignalStrength();
+        lastSerial = packet.serial;
         let microbitAlreadyAdded = false;
         for (let i = 0; i < lastKnownInformation.length; i++) {
             if (lastKnownInformation[i].serial == packet.serial) {
@@ -71,6 +73,7 @@ namespace proximity {
             microbit.lastReceivedSignal = packet.signal;
             lastKnownInformation.push(microbit);
         }
+        msgCount += 1;
     });
 
     /** 
@@ -84,5 +87,22 @@ namespace proximity {
             }
         }
         return -1;
+    }
+
+    export function lastKnownInfo(): string {
+        for (let i = 0; i < lastKnownInformation.length; i++) {
+            if (lastKnownInformation[i].serial == -1598746869) {
+                return "yes";
+            }
+        }
+        return "no";
+    }
+
+    export function numMessagesRecvd(): string {
+        return msgCount.toString();
+    }
+
+    export function printLastSerial(): string {
+        return lastSerial.toString();
     }
 }
