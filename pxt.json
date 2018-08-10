@@ -1,15 +1,15 @@
 {
-    "name": "blockyTalkyBLE",
-    "version": "0.0.8",
-    "description": "uses BLE UART to send and receive key value pairs",
+    "name": "proximity",
+    "version": "0.0.1",
+    "description": "blocks for measuring distance between microbits",
     "license": "MIT",
     "dependencies": {
         "core": "*",
-        "bluetooth": "*"
+        "radio": "*"
     },
     "files": [
         "README.md",
-        "blockyTalkyBLE.ts"
+        "proximity.ts"
     ],
     "testFiles": [
         "tests.ts"
