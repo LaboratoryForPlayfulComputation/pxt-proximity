@@ -62,7 +62,7 @@ namespace proximity {
         if (packet.signal)
             lastSignal = packet.signal;
         lastKnownInformation[lastSerial] = {"number": lastNumber, "string": lastString, "buffer": lastBuffer, "time": lastTime, "signal": lastSignal};
-        cb(packet)
+        //cb(packet)
     });
 
     /** 
@@ -70,8 +70,10 @@ namespace proximity {
     */
     //% blockId=radio_other_signal block="signal of other microbit %serialNo" blockGap=8
     export function signalStrengthOfRemoteMicrobit(serialNo: number): number {
-        if (lastKnownInformation[serialNo]["signal"]) {
-            return lastKnownInformation[serialNo]["signal"];
+        if (lastKnownInformation[serialNo]) {
+            if (lastKnownInformation[serialNo]["signal"]){
+                return lastKnownInformation[serialNo]["signal"];
+            }
         }
         return -1;
     }
