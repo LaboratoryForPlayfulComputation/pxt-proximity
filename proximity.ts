@@ -1,4 +1,4 @@
-//% color=#0062dB weight=96 icon="\uf500" block="Proximity"
+//% color=#0062dB weight=96 block="Proximity"
 namespace proximity {
     /* For saving most recent info */
     let lastNumber: number = -1;
@@ -7,7 +7,16 @@ namespace proximity {
     let lastTime: number = -1;
     let lastSerial: number = -1;
     let lastSignal: number = -1;
-    let lastKnownInformation: any = {};
+    let lastKnownInformation: Array<RemoteMicrobit> = [];
+
+    export class RemoteMicrobit {
+        public serial: number;
+        public lastReceivedNumber: number;
+        public lastReceivedString: string;
+        public lastReceivedBuffer: Buffer;
+        public lastReceivedTime: number;
+        public lastReceivedSignal: number;
+    }
 
     export class Packet {
         /**
@@ -49,20 +58,19 @@ namespace proximity {
         packet.receivedString = radio.receivedString();
         packet.receivedBuffer = radio.receivedBuffer();
         packet.signal = radio.receivedSignalStrength();
-        if (packet.receivedNumber)
-            lastNumber = packet.receivedNumber;
-        if (packet.receivedString)
-            lastString = packet.receivedString;
-        if (packet.receivedBuffer)
-            lastBuffer = packet.receivedBuffer;
-        if (packet.time)
-            lastTime = packet.time;
-        if (packet.serial)
-            lastSerial = packet.serial;
-        if (packet.signal)
-            lastSignal = packet.signal;
-        lastKnownInformation[lastSerial] = {"number": lastNumber, "string": lastString, "buffer": lastBuffer, "time": lastTime, "signal": lastSignal};
-        //cb(packet)
+        let microbitAlreadyAdded = false;
+        for (let i = 0; i < lastKnownInformation.length; i++) {
+            if (lastKnownInformation[i].serial == packet.serial) {
+                lastKnownInformation[i].lastReceivedSignal = packet.signal;
+                microbitAlreadyAdded = true;
+            }
+        }
+        if (!microbitAlreadyAdded) {
+            let microbit = new RemoteMicrobit();
+            microbit.serial = packet.serial;
+            microbit.lastReceivedSignal = packet.signal;
+            lastKnownInformation.push(microbit);
+        }
     });
 
     /** 
@@ -70,9 +78,9 @@ namespace proximity {
     */
     //% blockId=radio_other_signal block="signal of other microbit %serialNo" blockGap=8
     export function signalStrengthOfRemoteMicrobit(serialNo: number): number {
-        if (lastKnownInformation[serialNo]) {
-            if (lastKnownInformation[serialNo]["signal"]){
-                return lastKnownInformation[serialNo]["signal"];
+        for (let i = 0; i < lastKnownInformation.length; i++) {
+            if (lastKnownInformation[i].serial == serialNo) {
+                return lastKnownInformation[i].lastReceivedSignal;
             }
         }
         return -1;
