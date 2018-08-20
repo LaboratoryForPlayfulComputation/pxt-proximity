@@ -7,7 +7,7 @@ namespace proximity {
     let lastTime: number = -1;
     let lastSerial: number = -1;
     let lastSignal: number = -1;
-    let lastKnownInformation: Array<RemoteMicrobit> = [];
+    let knownMicrobits: Array<RemoteMicrobit> = [];
     let msgCount: number = 0;
 
     export class RemoteMicrobit {
@@ -17,6 +17,34 @@ namespace proximity {
         public lastReceivedBuffer: Buffer;
         public lastReceivedTime: number;
         public lastReceivedSignal: number;
+        public lastReceivedNumbers: Array<number>;
+        public lastReceivedStrings: Array<string>;
+        public lastReceivedBuffers: Array<Buffer>;
+        public lastReceivedTimes: Array<number>;
+        public lastReceivedSignals: Array<number>;
+        
+        constructor(serial: number) {
+            this.serial = serial;
+            this.lastReceivedSignal = -1;
+            this.lastReceivedSignals = [-1, -1, -1];
+        }
+
+        public averageLastReceivedSignals(): number {
+            let sum = 0;
+            let denominator = 0;
+            for (let i = 0; i < this.lastReceivedSignals.length; i++){
+                let signal = this.lastReceivedSignals[i];
+                if (signal != -1) {
+                    sum += signal;
+                    denominator += 1;
+                }
+            }
+
+            if (denominator == 0)
+                return -1;
+            
+            return sum / denominator;
+        }
     }
 
     export class Packet {
@@ -61,17 +89,17 @@ namespace proximity {
         packet.signal = radio.receivedSignalStrength();
         lastSerial = packet.serial;
         let microbitAlreadyAdded = false;
-        for (let i = 0; i < lastKnownInformation.length; i++) {
-            if (lastKnownInformation[i].serial == packet.serial) {
-                lastKnownInformation[i].lastReceivedSignal = packet.signal;
+        for (let i = 0; i < knownMicrobits.length; i++) {
+            if (knownMicrobits[i].serial == packet.serial) {
+                knownMicrobits[i].lastReceivedSignal = packet.signal;
                 microbitAlreadyAdded = true;
             }
         }
         if (!microbitAlreadyAdded) {
-            let microbit = new RemoteMicrobit();
-            microbit.serial = packet.serial;
+            let microbit = new RemoteMicrobit(packet.serial);
+            //microbit.serial = packet.serial;
             microbit.lastReceivedSignal = packet.signal;
-            lastKnownInformation.push(microbit);
+            knownMicrobits.push(microbit);
         }
         msgCount += 1;
     });
@@ -83,9 +111,23 @@ namespace proximity {
     */
     //% blockId=proximity_signal block="signal of other microbit %serialNo" blockGap=8
     export function signalStrengthOfRemoteMicrobit(serialNo: number): number {
-        for (let i = 0; i < lastKnownInformation.length; i++) {
-            if (lastKnownInformation[i].serial == serialNo) {
-                return lastKnownInformation[i].lastReceivedSignal;
+        for (let i = 0; i < knownMicrobits.length; i++) {
+            if (knownMicrobits[i].serial == serialNo) {
+                return knownMicrobits[i].lastReceivedSignal;
+            }
+        }
+        return -1;
+    }
+
+    /** 
+     * 
+    */
+    //% blockId=proximity_signal_avg block="average signal of other microbit %serialNo" blockGap=8
+    export function signalStrengthOfRemoteMicrobitAveraged(serialNo: number): number {
+        for (let i = 0; i < knownMicrobits.length; i++) {
+            if (knownMicrobits[i].serial == serialNo) {
+                // return knownMicrobits[i].averageLastReceivedSignals();
+                return knownMicrobits[i].lastReceivedSignal;
             }
         }
         return -1;
@@ -106,5 +148,30 @@ namespace proximity {
     export function setTransmitPower(power: number){
         radio.setTransmitPower(power);
     }
+
+    /** 
+     * 
+    */
+    //% blockId=proximity_send_num block="send number %num" blockGap=8
+    export function sendNumber(num: number){
+        radio.sendNumber(num);
+    }    
+
+    /** 
+     * 
+    */
+    //% blockId=proximity_send_string block="send string %str" blockGap=8
+    export function sendString(str: string){
+        radio.sendString(str);
+    }  
+    
+    /** 
+     * 
+    */
+    //% blockId=proximity_map block="map %input| from %min_input| to %max_input| to %min_output| to %max_output" blockGap=8
+    //% inlineInputMode="external" 
+    export function map(num: number, in_min: number, in_max: number, out_min: number, out_max: number): number{
+        return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    }      
 
 }
