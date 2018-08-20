@@ -1,6 +1,6 @@
 {
     "name": "proximity",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "blocks for measuring distance between microbits",
     "license": "MIT",
     "dependencies": {
