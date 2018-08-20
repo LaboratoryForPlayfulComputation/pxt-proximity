@@ -126,25 +126,28 @@ namespace proximity {
     export function signalStrengthOfRemoteMicrobitAveraged(serialNo: number): number {
         for (let i = 0; i < knownMicrobits.length; i++) {
             if (knownMicrobits[i].serial == serialNo) {
-                // return knownMicrobits[i].averageLastReceivedSignals();
-                return knownMicrobits[i].lastReceivedSignal;
+                return knownMicrobits[i].averageLastReceivedSignals();
             }
         }
         return -1;
     }
 
     /** 
-     * 
+     * Sets the group id for radio communications. A micro:bit can only listen to one group ID at any time.
+     * @param id the group id between ``0`` and ``255``, eg: 0
     */
     //% blockId=proximity_group block="set group %id" blockGap=8
+    //% id.min=0 id.max=255
     export function setGroup(id: number){
         radio.setGroup(id);
     }
 
     /** 
-     * 
+     * Change the output power level of the transmitter to the given value.
+     * @param power a value in the range 0..7, where 0 is the lowest power and 7 is the highest. eg: 7
     */
     //% blockId=proximity_power block="set transmit power %power" blockGap=8
+    //% power.min=0 power.max=7
     export function setTransmitPower(power: number){
         radio.setTransmitPower(power);
     }
