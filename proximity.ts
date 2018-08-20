@@ -1,4 +1,4 @@
-//% color=#0062dB weight=96 icon="\uf500" block="Proximity"
+//% color=#ab86f9 weight=5 icon="\uf500"
 namespace proximity {
     /* For saving most recent info */
     let lastNumber: number = -1;
@@ -17,14 +17,14 @@ namespace proximity {
         public lastReceivedBuffer: Buffer;
         public lastReceivedTime: number;
         public lastReceivedSignal: number;
-        public lastReceivedNumbers: Array<number>;
-        public lastReceivedStrings: Array<string>;
-        public lastReceivedBuffers: Array<Buffer>;
-        public lastReceivedTimes: Array<number>;
         public lastReceivedSignals: Array<number>;
         
         constructor(serial: number) {
             this.serial = serial;
+            this.lastReceivedNumber = -1;
+            this.lastReceivedString = "";
+            this.lastReceivedBuffer = null;
+            this.lastReceivedTime = -1;
             this.lastReceivedSignal = -1;
             this.lastReceivedSignals = [-1, -1, -1];
         }
@@ -90,15 +90,29 @@ namespace proximity {
         lastSerial = packet.serial;
         let microbitAlreadyAdded = false;
         for (let i = 0; i < knownMicrobits.length; i++) {
-            if (knownMicrobits[i].serial == packet.serial) {
-                knownMicrobits[i].lastReceivedSignal = packet.signal;
+            let microbit = knownMicrobits[i];
+            if (microbit.serial == packet.serial) {
+                microbit.lastReceivedNumber = packet.receivedNumber;
+                microbit.lastReceivedString = packet.receivedString;
+                microbit.lastReceivedBuffer = packet.receivedBuffer;
+                microbit.lastReceivedTime = packet.time;
+                microbit.lastReceivedSignal = packet.signal;
+                microbit.lastReceivedSignals[2] = microbit.lastReceivedSignals[1];
+                microbit.lastReceivedSignals[1] = microbit.lastReceivedSignals[0];
+                microbit.lastReceivedSignals[0] = microbit.lastReceivedSignal;
                 microbitAlreadyAdded = true;
             }
         }
         if (!microbitAlreadyAdded) {
             let microbit = new RemoteMicrobit(packet.serial);
-            //microbit.serial = packet.serial;
+            microbit.lastReceivedNumber = packet.receivedNumber;
+            microbit.lastReceivedString = packet.receivedString;
+            microbit.lastReceivedBuffer = packet.receivedBuffer;
+            microbit.lastReceivedTime = packet.time;
             microbit.lastReceivedSignal = packet.signal;
+            microbit.lastReceivedSignals[2] = microbit.lastReceivedSignals[1];
+            microbit.lastReceivedSignals[1] = microbit.lastReceivedSignals[0];
+            microbit.lastReceivedSignals[0] = microbit.lastReceivedSignal;
             knownMicrobits.push(microbit);
         }
         msgCount += 1;
@@ -175,6 +189,6 @@ namespace proximity {
     //% inlineInputMode="external" 
     export function map(num: number, in_min: number, in_max: number, out_min: number, out_max: number): number{
         return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-    }      
+    }   
 
 }
